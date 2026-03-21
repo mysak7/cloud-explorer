@@ -4,6 +4,7 @@ CREATE TABLE IF NOT EXISTS memories (
     id          SERIAL PRIMARY KEY,
     content     TEXT NOT NULL,
     tags        TEXT[],
+    provider    VARCHAR,
     embedding   vector(1024),
     created_at  TIMESTAMPTZ DEFAULT NOW()
 );

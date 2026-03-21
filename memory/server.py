@@ -41,15 +41,15 @@ def to_pg_vector(embedding: list[float]) -> str:
 
 
 @mcp.tool()
-def store_memory(content: str, tags: list[str] = []) -> str:
-    """Store a memory with optional tags. Content is embedded and saved to pgvector."""
+def store_memory(content: str, tags: list[str] = [], provider: str = "") -> str:
+    """Store a memory with optional tags and provider (e.g. 'aws', 'gcp'). Content is embedded and saved to pgvector."""
     embedding = get_embedding(content)
     conn = get_db_connection()
     try:
         with conn.cursor() as cur:
             cur.execute(
-                "INSERT INTO memories (content, tags, embedding) VALUES (%s, %s, %s::vector) RETURNING id",
-                (content, tags, to_pg_vector(embedding)),
+                "INSERT INTO memories (content, tags, provider, embedding) VALUES (%s, %s, %s, %s::vector) RETURNING id",
+                (content, tags, provider or None, to_pg_vector(embedding)),
             )
             row_id = cur.fetchone()[0]
             conn.commit()
@@ -68,7 +68,7 @@ def search_memory(query: str, limit: int = 5) -> str:
         with conn.cursor() as cur:
             cur.execute(
                 """
-                SELECT id, content, tags, 1 - (embedding <=> %s::vector) AS similarity
+                SELECT id, content, tags, provider, 1 - (embedding <=> %s::vector) AS similarity
                 FROM memories
                 ORDER BY embedding <=> %s::vector
                 LIMIT %s
@@ -83,9 +83,9 @@ def search_memory(query: str, limit: int = 5) -> str:
         return "No memories found."
 
     lines = []
-    for row_id, content, tags, similarity in rows:
+    for row_id, content, tags, provider, similarity in rows:
         lines.append(
-            f"[id={row_id}] (similarity={similarity:.3f})\n"
+            f"[id={row_id}] (similarity={similarity:.3f}) provider={provider}\n"
             f"  tags: {tags}\n"
             f"  content: {content}"
         )
@@ -101,7 +101,7 @@ def list_memories(tag: str = "") -> str:
             if tag:
                 cur.execute(
                     """
-                    SELECT id, content, tags, created_at
+                    SELECT id, content, tags, provider, created_at
                     FROM memories
                     WHERE %s = ANY(tags)
                     ORDER BY created_at DESC
@@ -112,7 +112,7 @@ def list_memories(tag: str = "") -> str:
             else:
                 cur.execute(
                     """
-                    SELECT id, content, tags, created_at
+                    SELECT id, content, tags, provider, created_at
                     FROM memories
                     ORDER BY created_at DESC
                     LIMIT 20
@@ -126,10 +126,10 @@ def list_memories(tag: str = "") -> str:
         return "No memories found."
 
     lines = []
-    for row_id, content, tags, created_at in rows:
+    for row_id, content, tags, provider, created_at in rows:
         preview = content[:100] + ("..." if len(content) > 100 else "")
         lines.append(
-            f"[id={row_id}] {created_at.strftime('%Y-%m-%d %H:%M')} tags={tags}\n  {preview}"
+            f"[id={row_id}] {created_at.strftime('%Y-%m-%d %H:%M')} provider={provider} tags={tags}\n  {preview}"
         )
     return "\n".join(lines)
 
