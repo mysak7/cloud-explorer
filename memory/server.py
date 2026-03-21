@@ -5,7 +5,6 @@ import os
 import boto3
 import psycopg2
 from fastmcp import FastMCP
-from pgvector.psycopg2 import register_vector
 
 logging.basicConfig(level=logging.INFO)
 logger = logging.getLogger(__name__)
@@ -33,8 +32,12 @@ def get_embedding(text: str) -> list[float]:
 
 def get_db_connection():
     conn = psycopg2.connect(PG_CONNECTION_STRING)
-    register_vector(conn)
     return conn
+
+
+def to_pg_vector(embedding: list[float]) -> str:
+    """Convert a float list to a PostgreSQL vector literal string."""
+    return "[" + ",".join(str(x) for x in embedding) + "]"
 
 
 @mcp.tool()
@@ -45,8 +48,8 @@ def store_memory(content: str, tags: list[str] = []) -> str:
     try:
         with conn.cursor() as cur:
             cur.execute(
-                "INSERT INTO memories (content, tags, embedding) VALUES (%s, %s, %s) RETURNING id",
-                (content, tags, embedding),
+                "INSERT INTO memories (content, tags, embedding) VALUES (%s, %s, %s::vector) RETURNING id",
+                (content, tags, to_pg_vector(embedding)),
             )
             row_id = cur.fetchone()[0]
             conn.commit()
@@ -59,17 +62,18 @@ def store_memory(content: str, tags: list[str] = []) -> str:
 def search_memory(query: str, limit: int = 5) -> str:
     """Search memories by semantic similarity to a query string."""
     embedding = get_embedding(query)
+    vec = to_pg_vector(embedding)
     conn = get_db_connection()
     try:
         with conn.cursor() as cur:
             cur.execute(
                 """
-                SELECT id, content, tags, 1 - (embedding <=> %s) AS similarity
+                SELECT id, content, tags, 1 - (embedding <=> %s::vector) AS similarity
                 FROM memories
-                ORDER BY embedding <=> %s
+                ORDER BY embedding <=> %s::vector
                 LIMIT %s
                 """,
-                (embedding, embedding, limit),
+                (vec, vec, limit),
             )
             rows = cur.fetchall()
     finally:

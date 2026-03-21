@@ -27,8 +27,7 @@ RUN curl -fsSL "https://awscli.amazonaws.com/awscli-exe-linux-x86_64.zip" -o /tm
     && rm -rf /tmp/awscliv2.zip /tmp/aws
 
 # --- uv (for uvx MCP servers) ---
-RUN curl -LsSf https://astral.sh/uv/install.sh | sh
-ENV PATH="/root/.local/bin:${PATH}"
+RUN curl -LsSf https://astral.sh/uv/install.sh | UV_INSTALL_DIR=/usr/local/bin sh
 
 # --- Claude Code ---
 RUN npm install -g @anthropic-ai/claude-code
@@ -49,13 +48,12 @@ RUN EXISTING_USER=$(getent passwd ${USER_UID} | cut -d: -f1) \
          useradd --uid ${USER_UID} --gid ${USER_GID} --shell /bin/bash --create-home ${USERNAME}; \
        fi
 
-# Re-expose uv for the agent user
-RUN cp -r /root/.local/bin/uv* /usr/local/bin/ 2>/dev/null || true
 
 WORKDIR /workspace
 
-# Pre-create .claude dir so bind-mounting credentials.json doesn't create it as root
-RUN mkdir -p /home/${USERNAME}/.claude && chown ${USER_UID}:${USER_GID} /home/${USERNAME}/.claude
+# Pre-create dirs so bind-mounting files doesn't create them as root
+RUN mkdir -p /home/${USERNAME}/.claude /home/${USERNAME}/.aws \
+    && chown ${USER_UID}:${USER_GID} /home/${USERNAME}/.claude /home/${USERNAME}/.aws
 
 USER ${USERNAME}
 

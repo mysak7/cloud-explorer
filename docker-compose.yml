@@ -33,7 +33,8 @@ services:
     network_mode: "service:netbird"
     volumes:
       - .:/workspace:cached
-      - ${HOME}/.aws:/home/agent/.aws:ro
+      - ${HOME}/.aws/credentials:/home/agent/.aws/credentials:ro
+      - ${HOME}/.aws/config:/home/agent/.aws/config:ro
       - ${HOME}/.claude.json:/home/agent/.claude.json
       - ${HOME}/.claude/.credentials.json:/home/agent/.claude/.credentials.json:ro
     environment:

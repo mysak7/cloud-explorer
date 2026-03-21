@@ -10,7 +10,7 @@
     },
     "awslabs-knowledge": {
       "command": "uvx",
-      "args": ["awslabs.aws-knowledge-mcp-server@latest"]
+      "args": ["awslabs.aws-documentation-mcp-server@latest"]
     },
     "aws-agent-memory": {
       "type": "stdio",
