@@ -20,6 +20,35 @@
         "PG_CONNECTION_STRING": "postgresql://agent:agent_password@pgvector:5432/agent_memory",
         "AWS_REGION": "eu-central-1"
       }
+    },
+    "gcp-gcloud": {
+      "type": "stdio",
+      "command": "npx",
+      "args": ["-y", "@google-cloud/gcloud-mcp"]
+    },
+    "gcp-compute": {
+      "type": "http",
+      "url": "https://compute.googleapis.com/mcp",
+      "headers": {
+        "Authorization": "Bearer ${GCP_ACCESS_TOKEN}",
+        "x-goog-user-project": "${GCP_PROJECT_ID}"
+      }
+    },
+    "gcp-gke": {
+      "type": "http",
+      "url": "https://container.googleapis.com/mcp",
+      "headers": {
+        "Authorization": "Bearer ${GCP_ACCESS_TOKEN}",
+        "x-goog-user-project": "${GCP_PROJECT_ID}"
+      }
+    },
+    "gcp-logging": {
+      "type": "http",
+      "url": "https://logging.googleapis.com/mcp",
+      "headers": {
+        "Authorization": "Bearer ${GCP_ACCESS_TOKEN}",
+        "x-goog-user-project": "${GCP_PROJECT_ID}"
+      }
     }
   }
 }

@@ -10,6 +10,8 @@ services:
     volumes:
       - netbird-client:/etc/netbird
     restart: unless-stopped
+    ports:
+      - "3000:3000"
 
   pgvector:
     image: pgvector/pgvector:pg17
@@ -21,6 +23,18 @@ services:
     volumes:
       - pgdata:/var/lib/postgresql/data
       - ./memory/init.sql:/docker-entrypoint-initdb.d/init.sql:ro
+    restart: unless-stopped
+
+  gcp-token-refresh:
+    image: google/cloud-sdk:alpine
+    volumes:
+      - ${HOME}/.config/gcloud:/root/.config/gcloud:ro
+      - gcp-token:/tmp/gcp
+    command: >
+      sh -c "while true; do
+        gcloud auth application-default print-access-token > /tmp/gcp/token 2>/dev/null || echo '' > /tmp/gcp/token;
+        sleep 2700;
+      done"
     restart: unless-stopped
 
   agent:
@@ -37,17 +51,22 @@ services:
       - ${HOME}/.aws/config:/home/agent/.aws/config:ro
       - ${HOME}/.claude.json:/home/agent/.claude.json
       - ${HOME}/.claude/.credentials.json:/home/agent/.claude/.credentials.json:ro
+      - ${HOME}/.config/gcloud:/home/agent/.config/gcloud:ro
+      - gcp-token:/tmp/gcp:ro
     environment:
       AWS_PROFILE: ${AWS_PROFILE:-default}
       ANTHROPIC_API_KEY: ${ANTHROPIC_API_KEY}
+      GCP_PROJECT_ID: ${GCP_PROJECT_ID:-}
+      GCP_ACCESS_TOKEN_FILE: /tmp/gcp/token
     depends_on:
       - netbird
       - pgvector
+      - gcp-token-refresh
     restart: unless-stopped
     stdin_open: true
     tty: true
-    command: sleep infinity
 
 volumes:
   netbird-client:
   pgdata:
+  gcp-token:
