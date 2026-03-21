@@ -11,6 +11,15 @@
     "awslabs-knowledge": {
       "command": "uvx",
       "args": ["awslabs.aws-knowledge-mcp-server@latest"]
+    },
+    "aws-agent-memory": {
+      "type": "stdio",
+      "command": "uv",
+      "args": ["run", "--project", "/workspace/memory", "python", "/workspace/memory/server.py"],
+      "env": {
+        "PG_CONNECTION_STRING": "postgresql://agent:agent_password@pgvector:5432/agent_memory",
+        "AWS_REGION": "eu-central-1"
+      }
     }
   }
 }

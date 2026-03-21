@@ -54,6 +54,9 @@ RUN cp -r /root/.local/bin/uv* /usr/local/bin/ 2>/dev/null || true
 
 WORKDIR /workspace
 
+# Pre-create .claude dir so bind-mounting credentials.json doesn't create it as root
+RUN mkdir -p /home/${USERNAME}/.claude && chown ${USER_UID}:${USER_GID} /home/${USERNAME}/.claude
+
 USER ${USERNAME}
 
 CMD ["bash"]

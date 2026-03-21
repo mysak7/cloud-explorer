@@ -11,6 +11,18 @@ services:
       - netbird-client:/etc/netbird
     restart: unless-stopped
 
+  pgvector:
+    image: pgvector/pgvector:pg17
+    container_name: agent-memory
+    environment:
+      POSTGRES_USER: agent
+      POSTGRES_PASSWORD: agent_password
+      POSTGRES_DB: agent_memory
+    volumes:
+      - pgdata:/var/lib/postgresql/data
+      - ./memory/init.sql:/docker-entrypoint-initdb.d/init.sql:ro
+    restart: unless-stopped
+
   agent:
     build:
       context: .
@@ -23,10 +35,13 @@ services:
       - .:/workspace:cached
       - ${HOME}/.aws:/home/agent/.aws:ro
       - ${HOME}/.claude.json:/home/agent/.claude.json
+      - ${HOME}/.claude/.credentials.json:/home/agent/.claude/.credentials.json:ro
     environment:
       AWS_PROFILE: ${AWS_PROFILE:-default}
+      ANTHROPIC_API_KEY: ${ANTHROPIC_API_KEY}
     depends_on:
       - netbird
+      - pgvector
     restart: unless-stopped
     stdin_open: true
     tty: true
@@ -34,3 +49,4 @@ services:
 
 volumes:
   netbird-client:
+  pgdata:
