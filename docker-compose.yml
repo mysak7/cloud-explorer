@@ -1,0 +1,36 @@
+services:
+  netbird:
+    image: netbirdio/netbird:latest
+    privileged: true
+    cap_add:
+      - NET_ADMIN
+      - SYS_ADMIN
+    environment:
+      NB_SETUP_KEY: ${NB_SETUP_KEY}
+    volumes:
+      - netbird-client:/etc/netbird
+    restart: unless-stopped
+
+  agent:
+    build:
+      context: .
+      dockerfile: Dockerfile
+      args:
+        USER_UID: ${HOST_UID:-1000}
+        USER_GID: ${HOST_GID:-1000}
+    network_mode: "service:netbird"
+    volumes:
+      - .:/workspace:cached
+      - ${HOME}/.aws:/home/agent/.aws:ro
+      - ${HOME}/.claude.json:/home/agent/.claude.json
+    environment:
+      AWS_PROFILE: ${AWS_PROFILE:-default}
+    depends_on:
+      - netbird
+    restart: unless-stopped
+    stdin_open: true
+    tty: true
+    command: sleep infinity
+
+volumes:
+  netbird-client:

@@ -1,0 +1,16 @@
+{
+  "mcpServers": {
+    "awslabs-core": {
+      "command": "uvx",
+      "args": ["awslabs.core-mcp-server@latest"]
+    },
+    "awslabs-aws-api": {
+      "command": "uvx",
+      "args": ["awslabs.aws-api-mcp-server@latest"]
+    },
+    "awslabs-knowledge": {
+      "command": "uvx",
+      "args": ["awslabs.aws-knowledge-mcp-server@latest"]
+    }
+  }
+}
