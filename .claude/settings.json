@@ -1,5 +1,16 @@
 {
   "permissions": {
     "defaultMode": "bypassPermissions"
-  }
+  },
+  "enableAllProjectMcpServers": true,
+  "enabledMcpjsonServers": [
+    "awslabs-core",
+    "awslabs-aws-api",
+    "awslabs-knowledge",
+    "aws-agent-memory",
+    "gcp-gcloud",
+    "gcp-compute",
+    "gcp-gke",
+    "gcp-logging"
+  ]
 }
