@@ -1,4 +1,4 @@
-# AWS Infrastructure Explorer — Agent SOP
+# Cloud Explorer — Agent SOP
 
 ## Role
 

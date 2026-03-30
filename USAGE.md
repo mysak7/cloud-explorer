@@ -1,6 +1,6 @@
-# AWS Explorer — Quick Ops
+# Cloud Explorer — Quick Ops
 
-All commands run from the repo root: `~/GitHub/aws-explorer`
+All commands run from the repo root: `~/GitHub/cloud-explorer`
 
 ## Rebuild the agent container
 
