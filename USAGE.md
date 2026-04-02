@@ -4,7 +4,7 @@ All commands run from the repo root: `~/GitHub/cloud-explorer`
 
 ## Rebuild the agent container
 
-After changing `Dockerfile`, `requirements.txt`, or any baked-in file:
+After changing `Dockerfile`, `entrypoint.sh`, `requirements.txt`, or any baked-in file:
 
 ```bash
 # Rebuild and restart agent only
