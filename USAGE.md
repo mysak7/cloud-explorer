@@ -41,3 +41,25 @@ docker compose ps               # all service states
 docker compose logs -f agent    # agent logs
 docker compose logs -f pgvector # memory DB logs
 ```
+
+## Azure authentication
+
+Azure tokens are auto-refreshed every 45 minutes by the `azure-token-refresh` sidecar. The sidecar reads credentials from `~/.azure` on the host.
+
+**Initial setup** (run on the host before starting the stack):
+
+```bash
+az login
+```
+
+**Manual token refresh** (if you get a 401 inside the agent):
+
+```bash
+docker compose restart azure-token-refresh
+```
+
+**Check Azure auth status:**
+
+```bash
+docker compose exec agent az account show
+```

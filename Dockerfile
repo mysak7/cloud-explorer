@@ -33,6 +33,10 @@ RUN curl -fsSL https://packages.cloud.google.com/apt/doc/apt-key.gpg \
     && apt-get update && apt-get install -y google-cloud-cli \
     && rm -rf /var/lib/apt/lists/*
 
+# --- Azure CLI ---
+RUN curl -sL https://aka.ms/InstallAzureCLIDeb | bash \
+    && rm -rf /var/lib/apt/lists/*
+
 # --- AWS CLI v2 ---
 RUN curl -fsSL "https://awscli.amazonaws.com/awscli-exe-linux-x86_64.zip" -o /tmp/awscliv2.zip \
     && unzip -q /tmp/awscliv2.zip -d /tmp \
@@ -74,8 +78,8 @@ RUN chmod +x /usr/local/bin/entrypoint.sh
 WORKDIR /workspace
 
 # Pre-create dirs so bind-mounting files doesn't create them as root
-RUN mkdir -p /home/${USERNAME}/.claude /home/${USERNAME}/.aws /home/${USERNAME}/.config/gcloud \
-    && chown -R ${USER_UID}:${USER_GID} /home/${USERNAME}/.claude /home/${USERNAME}/.aws /home/${USERNAME}/.config/gcloud
+RUN mkdir -p /home/${USERNAME}/.claude /home/${USERNAME}/.aws /home/${USERNAME}/.config/gcloud /home/${USERNAME}/.azure \
+    && chown -R ${USER_UID}:${USER_GID} /home/${USERNAME}/.claude /home/${USERNAME}/.aws /home/${USERNAME}/.config/gcloud /home/${USERNAME}/.azure
 
 USER ${USERNAME}
 

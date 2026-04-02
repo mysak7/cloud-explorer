@@ -49,6 +49,15 @@
         "Authorization": "Bearer ${GCP_ACCESS_TOKEN}",
         "x-goog-user-project": "${GCP_PROJECT_ID}"
       }
+    },
+    "azure": {
+      "type": "stdio",
+      "command": "npx",
+      "args": ["-y", "@azure/mcp@latest"],
+      "env": {
+        "AZURE_SUBSCRIPTION_ID": "${AZURE_SUBSCRIPTION_ID}",
+        "AZURE_TENANT_ID": "${AZURE_TENANT_ID}"
+      }
     }
   }
 }

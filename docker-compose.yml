@@ -25,6 +25,18 @@ services:
       - ./memory/init.sql:/docker-entrypoint-initdb.d/init.sql:ro
     restart: unless-stopped
 
+  azure-token-refresh:
+    image: mcr.microsoft.com/azure-cli
+    volumes:
+      - ${HOME}/.azure:/root/.azure:ro
+      - azure-token:/tmp/azure
+    command: >
+      sh -c "while true; do
+        az account get-access-token --resource https://management.azure.com --query accessToken -o tsv > /tmp/azure/token 2>/dev/null || echo '' > /tmp/azure/token;
+        sleep 2700;
+      done"
+    restart: unless-stopped
+
   gcp-token-refresh:
     image: google/cloud-sdk:alpine
     volumes:
@@ -53,15 +65,21 @@ services:
       - ${HOME}/.claude/.credentials.json:/home/agent/.claude/.credentials.json:ro
       - ${HOME}/.config/gcloud:/home/agent/.config/gcloud:ro
       - gcp-token:/tmp/gcp:ro
+      - ${HOME}/.azure:/home/agent/.azure:ro
+      - azure-token:/tmp/azure:ro
     environment:
       AWS_PROFILE: ${AWS_PROFILE:-default}
       ANTHROPIC_API_KEY: ${ANTHROPIC_API_KEY}
       GCP_PROJECT_ID: ${GCP_PROJECT_ID:-}
       GCP_ACCESS_TOKEN_FILE: /tmp/gcp/token
+      AZURE_SUBSCRIPTION_ID: ${AZURE_SUBSCRIPTION_ID:-}
+      AZURE_TENANT_ID: ${AZURE_TENANT_ID:-}
+      AZURE_ACCESS_TOKEN_FILE: /tmp/azure/token
     depends_on:
       - netbird
       - pgvector
       - gcp-token-refresh
+      - azure-token-refresh
     restart: unless-stopped
     stdin_open: true
     tty: true
@@ -70,3 +88,4 @@ volumes:
   netbird-client:
   pgdata:
   gcp-token:
+  azure-token:

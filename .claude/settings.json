@@ -11,6 +11,7 @@
     "gcp-gcloud",
     "gcp-compute",
     "gcp-gke",
-    "gcp-logging"
+    "gcp-logging",
+    "azure"
   ]
 }
