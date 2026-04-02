@@ -32,7 +32,9 @@ services:
       - azure-token:/tmp/azure
     command: >
       sh -c "while true; do
-        az account get-access-token --resource https://management.azure.com --query accessToken -o tsv > /tmp/azure/token 2>/dev/null || echo '' > /tmp/azure/token;
+        cp -r /root/.azure /tmp/azure-config;
+        AZURE_CONFIG_DIR=/tmp/azure-config az account get-access-token --resource https://management.azure.com --query accessToken -o tsv > /tmp/azure/token 2>/dev/null || echo '' > /tmp/azure/token;
+        rm -rf /tmp/azure-config;
         sleep 2700;
       done"
     restart: unless-stopped
